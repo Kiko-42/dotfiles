@@ -1,7 +1,34 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+# Omarchy keeps its stock editor and terminal and uses Herdr instead of tmux.
+link_config() {
+  local source="$1" target="$2"
+  mkdir -p "$(dirname "$target")"
+  if [[ -L "$target" && "$(readlink "$target")" == "$source" ]]; then
+    return
+  fi
+  if [[ -e "$target" || -L "$target" ]]; then
+    local backup="${target}.backup-$(date +%Y%m%d-%H%M%S)-$$"
+    mv -- "$target" "$backup"
+    echo "Backed up: $backup"
+  fi
+  ln -s -- "$source" "$target"
+}
+
+if [[ "$(uname -s)" == Linux ]]; then
+  CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+  link_config "$DOTFILES_DIR/foot/foot.ini" "$CONFIG_DIR/foot/foot.ini"
+  link_config "$DOTFILES_DIR/herdr/config.toml" "$CONFIG_DIR/herdr/config.toml"
+  link_config "$DOTFILES_DIR/lazygit/config.yml" "$CONFIG_DIR/lazygit/config.yml"
+  link_config "$DOTFILES_DIR/zsh/.p10k.zsh" "$HOME/.p10k.zsh"
+  link_config "$DOTFILES_DIR/zsh/.zshrc" "$HOME/.zshrc"
+  echo "Omarchy dotfiles setup complete (Foot, Herdr, lazygit, Powerlevel10k config)."
+  echo "Powerlevel10k requires zsh and the Powerlevel10k theme to be installed and loaded."
+  exit 0
+fi
 
 # nvim
 mkdir -p ~/.config
