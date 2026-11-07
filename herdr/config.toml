@@ -12,7 +12,7 @@ name = "terminal"
 panel_bg = "black"
 
 [terminal]
-default_shell = "/usr/bin/zsh"
+default_shell = "/bin/bash"
 # Matches -c "#{pane_current_path}" on every split, window, and session
 new_cwd = "follow"
 
